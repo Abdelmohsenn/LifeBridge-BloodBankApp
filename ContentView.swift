@@ -13,7 +13,7 @@ import MapKit
 struct ContentView: View {
     var body: some View {
         HStack(alignment: .top, content: {
-            User_View()
+            AuthenticationView()
            
         })
     }
@@ -65,6 +65,7 @@ struct WelcomeMenu: View {
                 .navigationBarTitle("", displayMode: .inline) // Clear the title
                 ) // Align to the trailing edge
             }
+        
             Text("Hello, \(userName)")
                 .font(.largeTitle)
                 .fontWeight(.heavy)
@@ -73,7 +74,7 @@ struct WelcomeMenu: View {
                 .frame()
                 .shadow(color: .gray, radius: 20)
             
-            Image("mainbloocpic").resizable().aspectRatio(contentMode: .fit).padding()
+            Image("Image 2").resizable().aspectRatio(contentMode: .fit).padding()
             
             Button(action: {
                     isAlertPresented = true
@@ -81,7 +82,7 @@ struct WelcomeMenu: View {
                     Text("Donate Now!")
                         .font(.headline)
                         .padding()
-                        .background(Color.red)
+                        .background(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .fontWeight(.bold)
@@ -95,6 +96,7 @@ struct WelcomeMenu: View {
                 )
 
             Button(action:{
+                
                 BacktoUserView=true
                 
             }){
@@ -110,7 +112,7 @@ struct WelcomeMenu: View {
                     .shadow(color: .gray, radius: 5, x: 0, y: 5) // Add a shadow effect
                 
             }.background(
-                NavigationLink("", destination: User_View(), isActive: $BacktoUserView)
+                NavigationLink("", destination: AuthenticationView(), isActive: $BacktoUserView)
                     .navigationTitle("")
                 
             )                    .navigationBarBackButtonHidden(false)
@@ -128,6 +130,7 @@ struct ChoiceOfDonation: View {
     @State private var IsListOfBloodDrives = false
     @State private var selectedhosp: String = ""
     @Binding var SelectedChoice: String
+    @State private var showNoOptionAlert = false
     
     var body: some View {
         Text("Choose Donation Type").font(.headline).fontWeight(.bold)
@@ -137,7 +140,7 @@ struct ChoiceOfDonation: View {
                     SelectedChoice = choice
                 }) {
                     HStack {
-                        Text(choice).foregroundColor(.black)
+                        Text(choice).foregroundColor(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                         Spacer()
                         if SelectedChoice == choice {
                             Image(systemName: "hand.point.left").foregroundColor(.black)
@@ -147,18 +150,25 @@ struct ChoiceOfDonation: View {
             }
         }
         Button(action: {
-            isListOfHospitalPresented = true
+            if SelectedChoice.isEmpty {
+                showNoOptionAlert = true
+            } else {
+                isListOfHospitalPresented = true
+            }
         }) {
             Text("Confirm Choice") .font(.headline)
+                .font(.headline)
                 .padding()
-                .background(Color.red)
+                .background(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                 .foregroundColor(.white)
                 .cornerRadius(10)
                 .fontWeight(.bold)
-                .cornerRadius(15) // Round the corners
+                .cornerRadius(20) // Round the corners
                 .shadow(color: .gray, radius: 5, x: 0, y: 5) // Add a shadow effect
         }
-        .disabled(SelectedChoice != "Hospitals" && SelectedChoice != "BloodDrives")
+        .alert(isPresented: $showNoOptionAlert) {
+            Alert(title: Text("No option selected"), message: Text("Please select a donation type before confirming your choice."), dismissButton: .default(Text("OK")))
+        }
         .background(
             NavigationLink(destination: destinationView(), isActive: $isListOfHospitalPresented) {
                 EmptyView()
@@ -179,10 +189,6 @@ struct ChoiceOfDonation: View {
 }
 
 
-
-
-    
-
 struct HospitalListView: View {
     @Binding var selectedHospitals: String
     @State var isProfileShown = false
@@ -192,7 +198,7 @@ struct HospitalListView: View {
     let Hospitals = ["Dar El-Fouad", "Army Forces Hospital", "Salam Maadi Hospital","Haram Hopital", "Nasayem", "Souad Kafafi Hospital"]
     var body: some View {
         
-        Text("Please choose a hospital to donate to").font(.title3).foregroundColor(.black).fontWeight(.semibold)
+        Text(" Choose a hospital to donate to").font(.title3).foregroundColor(.black).fontWeight(.semibold)
         VStack{
             
             List(Hospitals, id: \.self) { hospital in
@@ -215,15 +221,15 @@ struct HospitalListView: View {
                     Text("Confirm donation")
                         .font(.headline)
                         .padding()
-                        .background(Color.red)
+                        .background(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .fontWeight(.bold)
-                        .cornerRadius(15) // Round the corners
+                        .cornerRadius(20) // Round the corners
                         .shadow(color: .gray, radius: 5, x: 0, y: 5) // Add a shadow effect
                 }
                 .alert(isPresented: $showHospitalAlert) {
-                    Alert(title: Text(""), message: Text("\(selectedHospitals) will Contact you soon"), dismissButton: .default(Text("OK")) {
+                    Alert(title: Text(""), message: Text("\(selectedHospitals) will contact you soon"), dismissButton: .default(Text("OK")) {
                         NavigateToWelcome = true
                     })
                 }
@@ -244,52 +250,49 @@ struct BloodDriveView: View {
         ("Zayed Bloodmobile", "El-Sheikh Zayed, 6th of October", CLLocationCoordinate2D(latitude: 30.0492, longitude: 30.9762)),
         ("Sharm El-Sheikh Bloodmobile", "Khaleej Neama", CLLocationCoordinate2D(latitude: 27.9654, longitude: 34.3618)),
         ("North Coast Bloodmobile", "North-Coast, Sidi-Abdelrahman", CLLocationCoordinate2D(latitude: 30.91872, longitude: 28.738871)),
-      
-        ]
+    ]
+    
     @State private var selectedLocation: String?
-    @State private var showingMap = false
     @State private var isPresentingMapView = false
 
     var body: some View {
-        
         List {
-            Section(header: Text("⚠️ Donation is only available physically at the location")) {
+            Section(header: Text("⚠️ Donation is only available physically at the location").padding(.bottom)) {
                 ForEach(bloodMobileLocations, id: \.0) { (bloodMobileName, location, coordinate) in
                     NavigationLink(destination: MapView(isPresented: $isPresentingMapView, Location: location, annotationItems: [MyAnnotationItem(coordinate: coordinate)])) {
                         Text(bloodMobileName)
                             .font(.headline)
-                            .padding(.all, 20.0)
-                            .foregroundColor(.black)
+                            .padding()
+                            .foregroundColor(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                             .cornerRadius(10)
-                            .fontWeight(.bold)
-                            .cornerRadius(15)
                             .shadow(color: .gray, radius: 5, x: 2, y: 2)
-
-
                     }
+                    .buttonStyle(PlainButtonStyle()) // Removes the default button style
                 }
             }
         }
-        .listStyle(InsetGroupedListStyle())
+        .listStyle(GroupedListStyle())
     }
 }
 
+
 struct BloodTypeSelectionView: View {
     @Binding var selectedBloodType: String
+    @State private var showAlert = false
     @State var selectedGender: String = ""
     
     let bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
     
     var body: some View {
         VStack {
-            Text("Please Choose Your Blood Type").fontWeight(.bold).foregroundColor(.black)
+            Text("Choose Your Blood Type").fontWeight(.bold).foregroundColor(.black)
             
             List(bloodTypes, id: \.self) { bloodType in
                 Button(action: {
                     selectedBloodType = bloodType
                 }) {
                     HStack {
-                        Text(bloodType).foregroundColor(.red)
+                        Text(bloodType).foregroundColor(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                         Spacer()
                         if selectedBloodType == bloodType {
                             Image(systemName: "hand.point.left").foregroundColor(.black)
@@ -309,18 +312,31 @@ struct BloodTypeSelectionView: View {
                         .fontWeight(.bold)
                         .frame(maxWidth: 150)
                         .frame(height: 50)
-                        .background(Color.red)
+                        .background(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                         .cornerRadius(20)
                         .shadow(color: .gray, radius: 5, x: 0, y: 5)
                         .padding()
                 }
             )
-            
-            
+            .disabled(selectedBloodType.isEmpty)
+            .onTapGesture {
+                if selectedBloodType.isEmpty {
+                    showAlert = true
+                }
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Please Pick an Option"),
+                    message: Text("Select your blood type before proceeding."),
+                    dismissButton: .default(Text("OK")) {
+                        // Handle dismiss action if needed
+                    }
+                )
+            }
         }
-        
     }
 }
+
 
    
 struct ProfileView: View {
@@ -365,7 +381,7 @@ struct ProfileInfoView: View {
             Text(title)
                 .font(.system(size: 18))
                 .fontWeight(.bold)
-                .foregroundColor(.red)
+                .foregroundColor(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                 .padding(.horizontal, 10)
             
             Text(content)
@@ -392,7 +408,7 @@ struct GenderSelectionView: View {
     @State var navigateToLogin = false
     
     var body: some View {
-        Text("Please Choose Your Gender")
+        Text("Choose Your Gender")
             .fontWeight(.bold)
             .foregroundColor(.black)
             .padding()
@@ -403,7 +419,7 @@ struct GenderSelectionView: View {
             }) {
                 HStack {
                     Text(gender)
-                        .foregroundColor(.red)
+                        .foregroundColor(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                     Spacer()
                     if selectedGender == gender {
                         Image(systemName: "checkmark")
@@ -411,12 +427,21 @@ struct GenderSelectionView: View {
                 }
             }
         }
+        .alert(isPresented: $Isalert) {
+            if selectedGender.isEmpty {
+                return Alert(title: Text("Error"), message: Text("Please pick an option"), dismissButton: .default(Text("OK")))
+            } else {
+                return Alert(title: Text(""), message: Text("Your Account has been created!"), dismissButton: .default(Text("OK")) {
+                    navigateToLogin = true
+                })
+            }
+        }
         NavigationLink(destination: LOGINview(), isActive: $navigateToLogin) {
             Button(action: {
                 Isalert = true
             }) {
                 Text("Create Account")
-                    .foregroundColor(.red)
+                    .foregroundColor(Color(hue: 1.0, saturation: 1.0, brightness: 0.681))
                     .fontWeight(.bold)
                     .frame(maxWidth: 200)
                     .frame(height: 50)
@@ -425,12 +450,6 @@ struct GenderSelectionView: View {
                     .shadow(color: .gray, radius: 5, x: 0, y: 5)
                     .padding()
             }
-            .alert(isPresented: $Isalert) {
-                Alert(title: Text(""), message: Text("Your Account has been created!"), dismissButton: .default(Text("OK")) {
-                    navigateToLogin = true
-                })
-                
-            }
         }
     }
 }
@@ -438,13 +457,13 @@ struct GenderSelectionView: View {
 
                    
     
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .preferredColorScheme(.light)
-        ContentView()
-            .preferredColorScheme(.dark)
-    }
-}
-    
 
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ContentView()
+//            .preferredColorScheme(.light)
+//        ContentView()
+//            .preferredColorScheme(.dark)
+//    }
+//}
+//    
